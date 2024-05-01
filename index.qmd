@@ -4,18 +4,131 @@ subtitle: "Business Data Science Basics"
 author: "Alexander Thiel"
 ---
 
-![](assets/logo/logo.png){width=80% fig-align="center"}
+![](assets/logo/logo.png){width="80%" fig-align="center"}
 
-This is a template example for lab journaling. Students in the data science courses at the Institute of Entrepreneurship will use this template to learn R for business analytics. Students can replace this text as they wish.
+# Intro To the tidyverse Challenges
 
-## How to use
+```{R include=FALSE}
 
-1. Accept the assignment and get your own github repo.
+library(lubridate)
+library(tidyverse)
+library(readxl)
 
-2. Blog/journal what you are doing in R, by editing the `.qmd` files. 
+bike_orderlines_wrangled_tbl <- read_excel("IntroTidyVerse/00_data/02_wrangled_data/bike_orderlines.xlsx")
+```
 
-3. See the links page for lots of helpful links on learning R.
+## Challenge 1
 
-4. Change everything to make it your own.
+```{R echo=TRUE}
 
-5. Make sure to render you website everytime before you want to upload changes
+#1: Analyse sales by location with bar plot
+
+
+bike_orderlines_wrangled_tbl <- bike_orderlines_wrangled_tbl %>%
+  # Separate location into city and state
+  separate(col    = location,
+           into   = c("city", "state"),
+           sep    = ", ")
+
+sales_by_state_tbl <- bike_orderlines_wrangled_tbl %>%
+  
+  #select columns
+  select(total_price, state) %>%
+  
+  
+  #group by year & summarise sales
+  
+  group_by(state)%>%
+  summarise(sales = sum(total_price)) %>%
+  
+  mutate(sales_text = scales::dollar(sales, big.mark = ".", 
+                                     decimal.mark = ",", 
+                                     prefix = "", 
+                                     suffix = " €"))
+sales_by_state_tbl
+```
+
+
+```{r plot1, fig.width=12, fig.height=9}
+
+# Step 2 - Visualize
+
+sales_by_state_tbl %>%
+  
+  ggplot(aes(x=state,y=sales)) +
+  
+  geom_col(fill="#2DC6D6")+
+  geom_label(aes(label = sales_text))+
+  geom_smooth(method="lm",se=FALSE)+
+  
+  scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
+                                                    decimal.mark = ",", 
+                                                    prefix = "", 
+                                                    suffix = " €")) +
+  labs(
+    title    = "Revenue by State",
+    x = "", # Override defaults for x and y
+    y = "Revenue"
+  )+
+  
+   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+## Challenge 2
+
+
+
+```{R echo=TRUE}
+
+
+  #Step 1: Manipulate
+
+sales_by_year_state_tbl <- bike_orderlines_wrangled_tbl %>%
+  
+  select(order_date, total_price, state) %>%
+  mutate(year = year(order_date)) %>%
+  
+  group_by(year,state) %>%
+  summarise(sales = sum(total_price)) %>%
+  ungroup() %>%
+  
+  mutate(sales_text = scales::dollar(sales,big.mark = ".",
+                                     decimal.mark = ",",
+                                     prefix = "",
+                                     suffix = " €"))
+
+sales_by_year_state_tbl
+
+```
+
+```{r plot2, fig.width=12, fig.height=9}
+# Step 2: Visualise
+
+
+sales_by_year_state_tbl %>%
+  
+  # Set up x, y, fill
+  ggplot(aes(x = year, y = sales, fill = state)) +
+  
+  # Geometries
+  geom_col() + # Run up to here to get a stacked bar plot
+  
+  geom_smooth(method = "lm", se = FALSE) + # Adding a trendline
+  
+  # Facet
+  facet_wrap(~ state) +
+  
+  # Formatting
+  scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
+                                                    decimal.mark = ",", 
+                                                    prefix = "", 
+                                                    suffix = " €")) +
+  labs(
+    title = "Revenue by year and State",
+    fill = "State" # Changes the legend name
+  )
+
+
+```
