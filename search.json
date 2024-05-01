@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "My Lab Journal",
     "section": "",
-    "text": "This is a template example for lab journaling. Students in the data science courses at the Institute of Entrepreneurship will use this template to learn R for business analytics. Students can replace this text as they wish."
+    "text": "# Intro To the tidyverse"
   },
   {
     "objectID": "index.html#how-to-use",
@@ -38,8 +38,8 @@
     "objectID": "content/01_journal/01_tidyverse.html#header-2",
     "href": "content/01_journal/01_tidyverse.html#header-2",
     "title": "Tidyverse",
-    "section": "2.1 Header 2",
-    "text": "2.1 Header 2\n\nHeader 3\n\nHeader 4\n\nHeader 5\n\nHeader 6"
+    "section": "\n2.1 Header 2",
+    "text": "2.1 Header 2\nHeader 3\nHeader 4\nHeader 5\nHeader 6"
   },
   {
     "objectID": "content/01_journal/02_data_acquisition.html",
@@ -75,5 +75,33 @@
     "title": "Links",
     "section": "",
     "text": "Google is great, Google your problem\nStackoverflow is great, google will often take you there because someone has already asked your question, and someone else has answered, usually many people have answered your question many ways."
+  },
+  {
+    "objectID": "index.html#analyse-sales-by-location-with-bar-plot",
+    "href": "index.html#analyse-sales-by-location-with-bar-plot",
+    "title": "My Lab Journal",
+    "section": "1: Analyse sales by location with bar plot",
+    "text": "1: Analyse sales by location with bar plot\n\nManipulation\nbike_orderlines_wrangled_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;% # Separate location into city and state separate(col = location, into = c(“city”, “state”), sep = “,”)\nlibrary(lubridate)\nsales_by_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n#select columns select(total_price, state) %&gt;%\n#group by year & summarise sales\ngroup_by(state)%&gt;% summarise(sales = sum(total_price)) %&gt;%\nmutate(sales_text = scales::dollar(sales, big.mark = “.”, decimal.mark = “,”, prefix = ““, suffix =” €“)) sales_by_state_tbl\n\n\nVisualising\nsales_by_state_tbl %&gt;%\nggplot(aes(x=state,y=sales)) +\ngeom_col(fill=“#2DC6D6”)+ geom_label(aes(label = sales_text))+ geom_smooth(method=“lm”,se=FALSE)+\nscale_y_continuous(labels = scales::dollar_format(big.mark = “.”, decimal.mark = “,”, prefix = ““, suffix =” €“)) + labs( title =”Revenue by State”, x = ““, # Override defaults for x and y y =”Revenue” )+\ntheme(axis.text.x = element_text(angle = 45, hjust = 1))"
+  },
+  {
+    "objectID": "index.html#analyse-sales-by-location-and-yearfacet_wrap",
+    "href": "index.html#analyse-sales-by-location-and-yearfacet_wrap",
+    "title": "My Lab Journal",
+    "section": "2: analyse sales by location and year(facet_wrap)",
+    "text": "2: analyse sales by location and year(facet_wrap)\n### Manipulation\nsales_by_year_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\nselect(order_date, total_price, state) %&gt;% mutate(year = year(order_date)) %&gt;%\ngroup_by(year,state) %&gt;% summarise(sales = sum(total_price)) %&gt;% ungroup() %&gt;%\nmutate(sales_text = scales::dollar(sales,big.mark = “.”, decimal.mark = “,”, prefix = ““, suffix =” €“))\nsales_by_year_state_tbl\n### Visualisation\nsales_by_year_state_tbl %&gt;%\n# Set up x, y, fill ggplot(aes(x = year, y = sales, fill = state)) +\n# Geometries geom_col() + # Run up to here to get a stacked bar plot\ngeom_smooth(method = “lm”, se = FALSE) + # Adding a trendline\n# Facet facet_wrap(~ state) +\n# Formatting scale_y_continuous(labels = scales::dollar_format(big.mark = “.”, decimal.mark = “,”, prefix = ““, suffix =” €“)) + labs( title =”Revenue by year and State”, fill = “State” # Changes the legend name )"
+  },
+  {
+    "objectID": "index.html#challenge-1",
+    "href": "index.html#challenge-1",
+    "title": "My Lab Journal",
+    "section": "Challenge 1",
+    "text": "Challenge 1\n\n#1: Analyse sales by location with bar plot\n\n\nbike_orderlines_wrangled_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  # Separate location into city and state\n  separate(col    = location,\n           into   = c(\"city\", \"state\"),\n           sep    = \", \")\n\nsales_by_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  \n  #select columns\n  select(total_price, state) %&gt;%\n  \n  \n  #group by year & summarise sales\n  \n  group_by(state)%&gt;%\n  summarise(sales = sum(total_price)) %&gt;%\n  \n  mutate(sales_text = scales::dollar(sales, big.mark = \".\", \n                                     decimal.mark = \",\", \n                                     prefix = \"\", \n                                     suffix = \" €\"))\nsales_by_state_tbl\n\n# A tibble: 12 × 3\n   state                            sales sales_text  \n   &lt;chr&gt;                            &lt;dbl&gt; &lt;chr&gt;       \n 1 Baden-Württemberg              6521090 6.521.090 € \n 2 Bavaria                        6742819 6.742.819 € \n 3 Berlin                         1128433 1.128.433 € \n 4 Bremen                        10653499 10.653.499 €\n 5 Hamburg                        3874756 3.874.756 € \n 6 Hesse                          1558901 1.558.901 € \n 7 Lower Saxony                   4107115 4.107.115 € \n 8 Mecklenburg-Western Pomerania   618974 618.974 €   \n 9 North Rhine-Westphalia        21200613 21.200.613 €\n10 Saxony                         2230245 2.230.245 € \n11 Saxony-Anhalt                   569614 569.614 €   \n12 Schleswig-Holstein             3224749 3.224.749 € \n\n\n\n# Step 2 - Visualize\n\nsales_by_state_tbl %&gt;%\n  \n  ggplot(aes(x=state,y=sales)) +\n  \n  geom_col(fill=\"#2DC6D6\")+\n  geom_label(aes(label = sales_text))+\n  geom_smooth(method=\"lm\",se=FALSE)+\n  \n  scale_y_continuous(labels = scales::dollar_format(big.mark = \".\", \n                                                    decimal.mark = \",\", \n                                                    prefix = \"\", \n                                                    suffix = \" €\")) +\n  labs(\n    title    = \"Revenue by State\",\n    x = \"\", # Override defaults for x and y\n    y = \"Revenue\"\n  )+\n  \n   theme(axis.text.x = element_text(angle = 45, hjust = 1))\n\n`geom_smooth()` using formula = 'y ~ x'"
+  },
+  {
+    "objectID": "index.html#challenge-2",
+    "href": "index.html#challenge-2",
+    "title": "My Lab Journal",
+    "section": "Challenge 2",
+    "text": "Challenge 2\n\n  #Step 1: Manipulate\n\nsales_by_year_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  \n  select(order_date, total_price, state) %&gt;%\n  mutate(year = year(order_date)) %&gt;%\n  \n  group_by(year,state) %&gt;%\n  summarise(sales = sum(total_price)) %&gt;%\n  ungroup() %&gt;%\n  \n  mutate(sales_text = scales::dollar(sales,big.mark = \".\",\n                                     decimal.mark = \",\",\n                                     prefix = \"\",\n                                     suffix = \" €\"))\n\n`summarise()` has grouped output by 'year'. You can override using the\n`.groups` argument.\n\nsales_by_year_state_tbl\n\n# A tibble: 60 × 4\n    year state                           sales sales_text \n   &lt;dbl&gt; &lt;chr&gt;                           &lt;dbl&gt; &lt;chr&gt;      \n 1  2015 Baden-Württemberg             1031924 1.031.924 €\n 2  2015 Bavaria                       1301461 1.301.461 €\n 3  2015 Berlin                          95853 95.853 €   \n 4  2015 Bremen                        1395912 1.395.912 €\n 5  2015 Hamburg                        423090 423.090 €  \n 6  2015 Hesse                          308609 308.609 €  \n 7  2015 Lower Saxony                   584386 584.386 €  \n 8  2015 Mecklenburg-Western Pomerania  222003 222.003 €  \n 9  2015 North Rhine-Westphalia        3735092 3.735.092 €\n10  2015 Saxony                         238371 238.371 €  \n# ℹ 50 more rows\n\n\n\n# Step 2: Visualise\n\n\nsales_by_year_state_tbl %&gt;%\n  \n  # Set up x, y, fill\n  ggplot(aes(x = year, y = sales, fill = state)) +\n  \n  # Geometries\n  geom_col() + # Run up to here to get a stacked bar plot\n  \n  geom_smooth(method = \"lm\", se = FALSE) + # Adding a trendline\n  \n  # Facet\n  facet_wrap(~ state) +\n  \n  # Formatting\n  scale_y_continuous(labels = scales::dollar_format(big.mark = \".\", \n                                                    decimal.mark = \",\", \n                                                    prefix = \"\", \n                                                    suffix = \" €\")) +\n  labs(\n    title = \"Revenue by year and State\",\n    fill = \"State\" # Changes the legend name\n  )\n\n`geom_smooth()` using formula = 'y ~ x'"
   }
 ]
