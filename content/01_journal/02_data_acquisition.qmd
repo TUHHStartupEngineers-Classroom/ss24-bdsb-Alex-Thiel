@@ -1,8 +1,46 @@
 ---
 title: "Data Acquisition"
-author: "Joschka Schwarz"
+author: "Alexander Thiel"
 ---
 
 ::: callout-note
 You can delete everything in here and start fresh.
 :::
+
+```{r,results = FALSE}
+
+library(httr)
+library(tidyverse)
+library("rstudioapi")
+library(keyring)
+library(jsonlite)
+library(ggplot2)
+
+```
+
+# Challenge Part 1
+
+```{r}
+
+response = GET("https://api.open-meteo.com/v1/forecast?latitude=53.54&longitude=9.98&forecast_days=1&hourly=temperature_2m")
+
+
+resp <-content(response, as = "parsed")
+
+time<- list()
+temp<- list()
+
+for(i in 1:24){
+  time<-append(time, resp[[9]][[1]][[i]], after = i)
+  temp<-append(temp, resp[[9]][[2]][[i]], after = i)
+}
+
+Data <-list(Temp=temp,Time=time)
+library(dplyr)
+dataFrame <- Data %>% 
+  as_tibble()
+
+print(dataFrame,n=10)
+
+
+```
