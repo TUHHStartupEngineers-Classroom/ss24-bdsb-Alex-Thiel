@@ -1,8 +1,67 @@
 ---
 title: "Data Wrangling"
-author: "Joschka Schwarz"
+author: "Alexander Thiel"
 ---
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+```{r}
+library(vroom)
+library(tidyverse)
+library(data.table)
+
+```
+
+# Challenge Part 1:
+
+
+
+```{r}
+
+#importing data
+patent_assignee_col_types <- list(
+  patent_id = col_character(),
+  assignee_id = col_character()
+)
+
+patent_assignee_tbl <- vroom(
+  file       = "DataWrangling/Patent_data_reduced/patent_assignee.tsv", 
+  delim      = "\t", 
+  col_types  = patent_assignee_col_types,
+  na         = c("", "NA", "NULL")
+)
+
+assignee_col_types <- list(
+  id = col_character(),
+  type = col_integer(),
+  organization = col_character()
+)
+
+assignee_tbl <- vroom(
+  file       = "DataWrangling/Patent_data_reduced/assignee.tsv", 
+  delim      = "\t", 
+  col_types  = assignee_col_types,
+  na         = c("", "NA", "NULL")
+)
+
+```
+
+
+```{r}
+setDT(assignee_tbl)
+
+setDT(patent_assignee_tbl)
+
+setkey(assignee_tbl,id)
+setkey(patent_assignee_tbl,assignee_id)
+
+
+combined_data <- assignee_tbl[patent_assignee_tbl]
+
+temp <-combined_data[,.N,by = organization]
+
+setDT(temp)
+
+setorder(temp,-N)
+
+temp[1:5,,]
+
+```
