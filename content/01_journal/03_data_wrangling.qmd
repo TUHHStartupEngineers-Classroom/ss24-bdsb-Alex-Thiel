@@ -3,6 +3,7 @@ title: "Data Wrangling"
 author: "Alexander Thiel"
 ---
 
+
 ```{r}
 library(vroom)
 library(tidyverse)
@@ -42,6 +43,34 @@ assignee_tbl <- vroom(
   na         = c("", "NA", "NULL")
 )
 
+patent_col_types <- list(
+  id = col_character(),
+  date = col_date("%Y-%m-%d"),
+  num_claims = col_double()
+)
+
+patent_tbl <- vroom(
+  file       = "DataWrangling/Patent_data_reduced/patent.tsv", 
+  delim      = "\t", 
+  col_types  = patent_col_types,
+  na         = c("", "NA", "NULL")
+)
+
+uspc_col_types <- list(
+  patent_id = col_character(),
+  mainclass_id = col_character(),
+  sequence = col_integer()
+)
+
+uspc_tbl <- vroom(
+  file       = "DataWrangling/Patent_data_reduced/uspc.tsv", 
+  delim      = "\t", 
+  col_types  = uspc_col_types,
+  na         = c("", "NA", "NULL")
+)
+
+
+rm(assignee_col_types,patent_col_types,uspc_col_types,patent_assignee_col_types)
 ```
 
 
@@ -54,9 +83,9 @@ setkey(assignee_tbl,id)
 setkey(patent_assignee_tbl,assignee_id)
 
 
-combined_data <- assignee_tbl[patent_assignee_tbl]
+combined_data_tbl <- assignee_tbl[patent_assignee_tbl]
 
-temp <-combined_data[,.N,by = organization]
+temp <-combined_data_tbl[,.N,by = organization]
 
 setDT(temp)
 
@@ -65,3 +94,20 @@ setorder(temp,-N)
 temp[1:5,,]
 
 ```
+
+# Challenge Part 2:
+
+```{r}
+combined_data_tbl <- combined_data_tbl[patent_tbl, on = c(patent_id="id")]
+
+combined_data_tbl <- na.omit(combined_data_tbl) #remove rows where organisation is NULL
+
+temp_tbl <- combined_data_tbl[month(date)==5 & year(date)==2014 & !is.null(organization),.N, by = organization]
+
+setorder(temp_tbl,-N)
+
+temp_tbl[1:10,,]
+
+
+```
+
