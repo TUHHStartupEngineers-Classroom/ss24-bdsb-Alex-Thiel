@@ -111,3 +111,24 @@ temp_tbl[1:10,,]
 
 ```
 
+# Challenge Part 3:
+```{r}
+
+setkey(uspc_tbl,NULL)
+setkey(patent_tbl,NULL)
+setkey(patent_assignee_tbl,NULL)
+setDT(uspc_tbl)
+combined_data_tbl <-uspc_tbl[patent_assignee_tbl,on = "patent_id"]
+combined_data_tbl <- combined_data_tbl[assignee_tbl,on = c(assignee_id="id")]
+setDT(combined_data_tbl)
+
+combined_data_tbl <- na.omit(combined_data_tbl)
+
+temp_tbl <-combined_data_tbl[,.(patents= .N),by=.(organization, mainclass_id)]  
+
+setDT(temp_tbl)
+setorder(temp_tbl,-patents)
+temp_tbl<-temp_tbl[1:10,.('Occurence in top 10'=.N),by=mainclass_id] 
+temp_tbl[1:5,,]   
+
+```
