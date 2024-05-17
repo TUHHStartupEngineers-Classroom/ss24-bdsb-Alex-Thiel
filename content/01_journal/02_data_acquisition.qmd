@@ -3,9 +3,6 @@ title: "Data Acquisition"
 author: "Alexander Thiel"
 ---
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
 
 ```{r,results = FALSE}
 
@@ -15,6 +12,8 @@ library("rstudioapi")
 library(keyring)
 library(jsonlite)
 library(ggplot2)
+library(rvest)     
+library(xopen) 
 
 ```
 
@@ -39,4 +38,42 @@ output_dataframe <- as.data.frame(data)
 select(output_dataframe, "callsign", "estArrivalAirport", "estDepartureAirport", "icao24")
 
 
+```
+
+
+## Challenge Part 2
+
+
+```{r}
+url_home        <- "https://www.rosebikes.de/fahrr%C3%A4der"
+
+html_home       <- read_html(url_home)
+html_home |> xml2::write_html("radon_bikes.html")
+
+
+bike_categories_chr <- html_home |>
+  
+  html_elements(css = ".catalog-navigation__link") |>
+  
+  html_attr('href') |>
+  
+  str_c("https://www.rosebikes.de", ... =_)
+
+
+bike_categories_chr
+
+# Select gravel bike category
+bike_category_url <- bike_categories_chr[1]
+
+# Get the URLs for the bikes of the first category
+html_bike_category  <- read_html(bike_category_url)
+
+bike_url_chr        <- html_bike_category |>
+  
+  html_elements(".basic-headline__title") |>
+  
+  
+  html_attr("href")
+
+bike_url_chr
 ```
