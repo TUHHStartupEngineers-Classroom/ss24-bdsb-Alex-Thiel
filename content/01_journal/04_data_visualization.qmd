@@ -1,8 +1,127 @@
 ---
 title: "Data Visualization"
-author: "Joschka Schwarz"
+author: "Alexander Thiel"
 ---
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+## Data Import
+
+```{r, results='hide'}
+library(data.table)
+library(tidyverse)
+covid_data_tbl <- read_csv("https://covid.ourworldindata.org/data/owid-covid-data.csv")
+```
+
+
+
+
+## Challenge 1
+
+```{r}
+
+# Challenge 1: Plot covid cases per month per country
+
+## plot should be line graph, each country different colour scale =25 Million
+## plot should contain date, cumulative cases, country
+covid_data_reduced_tbl <- covid_data_tbl %>%
+                          select(location,total_cases,date,continent)%>%
+                          #filter(starts_with(location, "Ger") )
+                          filter(date<"2022-05-31" )%>%
+                          #filter(continent=='Europe')%>%
+                          #complete(total_cases_per_million) %>% 
+                          mutate(across(total_cases, ~replace_na(., 0)))%>%
+                          filter(location =="Germany"|location =="United Kingdom"|location =="France"|location =="Spain"|location =="United States")
+                            
+
+covid_data_reduced_tbl %>%
+  
+  #distinct(date,total_cases_per_million,location)
+  ggplot(aes(date,total_cases,group = location, color = location)) +
+    geom_line()+
+    geom_smooth(span = 0.05)+
+  scale_x_date(
+      NULL,
+      breaks = scales::breaks_width("1 months"),
+      date_labels = "%b '%y"
+      #scale_x_date(date_labels = "%b %y")
+  )+
+  
+  scale_y_continuous(
+    labels = scales::label_number(scale = 1e-6, 
+                                  preix = "",
+                                  suffix = "M")
+  )+
+  
+  labs(
+    title = "COVID-19 Confirmed Worldwide Cases",
+    subtitle = "As of 01-07-2022",
+    x="Month",
+    y = "Cumulative Cases",
+    color = "Country"
+    
+  )+
+  theme(legend.position = 'bottom',
+        legend.direction = "horizontal",
+        legend.text.position = "bottom",
+        legend.background = element_rect(fill = 'transparent'),
+        legend.box.background = element_rect(fill='transparent'),
+        plot.background = element_rect(fill="transparent",color=NA),
+        strip.background = element_rect(fill = 'transparent'),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+        )
+ 
+
+```
+
+### plot can be found at: \\content\\01_journal\\Plots\\covid_cases_worldwide.png
+
+## Challenge 2
+
+```{r}
+
+world <- map_data("world")
+
+world_tbl <- world%>%
+              select(long,lat,group,order,region)
+
+rm("world")
+
+covid_data_world <-covid_data_tbl %>%
+                    select(location,total_deaths_per_million,date,continent)%>%
+                    mutate(across(total_deaths_per_million, ~replace_na(., 0)))%>% 
+                    mutate(mortality = total_deaths_per_million/1)%>%
+                    filter(date =="2024-04-28") %>%
+                    mutate(location = case_when(
+                    location == "United Kingdom" ~ "UK",
+                    location == "United States" ~ "USA",
+                    location == "Democratic Republic of Congo" ~ "Democratic Republic of the Congo",
+                    TRUE ~ location
+                  )) %>%
+                  distinct()
+                   
+
+
+setDT(covid_data_world)
+setDT(world_tbl)
+
+covid_data_world <- covid_data_world[world_tbl,on = c(location="region")]
+
+
+ggplot(covid_data_world, aes(long, lat, group = group))+
+  geom_polygon(aes(fill =mortality ), color = "lightgrey")+
+  scale_fill_gradient(low="red",
+                      high ="black",
+                      name = "Mortality rate\n(Deaths per million)")+
+  
+  labs(
+    title = "COVID-19 Confirmed Worldwide Deaths relative to population size",
+    subtitle = "As of 28-04-2024",
+    x="",
+    y = "",
+  )+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        )
+
+```
+
+### plot can be found at: \\content\\01_journal\\Plots\\map_covid_mortality.png

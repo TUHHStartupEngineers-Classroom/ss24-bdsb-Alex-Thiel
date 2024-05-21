@@ -1,8 +1,81 @@
 ---
 title: "Data Acquisition"
-author: "Joschka Schwarz"
+author: "Alexander Thiel"
 ---
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+
+```{r,results = FALSE}
+
+library(httr)
+library(tidyverse)
+library("rstudioapi")
+library(keyring)
+library(jsonlite)
+library(ggplot2)
+library(rvest)     
+library(xopen) 
+
+```
+
+# Challenge Part 1
+
+Flights arriving at Hamburg International Airport between 12:00 on 09-05-2024 and 12:00 on 10-05-2024
+
+```{r}
+
+hamburg_code = "EDDH"
+
+start_time = 1715330700 #2024-05-09 12:00
+end_time =  1715335200 ##2024-05-10 12:00
+
+response = GET("https://opensky-network.org/api/flights/arrival",
+               query = list(airport = hamburg_code,begin = start_time, end=end_time))
+
+resp <-content(response, as = "parsed")
+
+data = fromJSON(rawToChar(response$content))
+
+output_dataframe <- as.data.frame(data)
+
+select(output_dataframe, "callsign", "estArrivalAirport", "estDepartureAirport", "icao24")
+
+
+```
+
+
+## Challenge Part 2
+
+
+```{r}
+url_home        <- "https://www.rosebikes.de/fahrr%C3%A4der"
+
+html_home       <- read_html(url_home)
+html_home |> xml2::write_html("radon_bikes.html")
+
+
+bike_categories_chr <- html_home |>
+  
+  html_elements(css = ".catalog-navigation__link") |>
+  
+  html_attr('href') |>
+  
+  str_c("https://www.rosebikes.de", ... =_)
+
+
+bike_categories_chr
+
+# Select gravel bike category
+bike_category_url <- bike_categories_chr[1]
+
+# Get the URLs for the bikes of the first category
+html_bike_category  <- read_html(bike_category_url)
+
+bike_url_chr        <- html_bike_category |>
+  
+  html_elements(".basic-headline__title") |>
+  
+  
+  html_attr("href")
+
+bike_url_chr
+```

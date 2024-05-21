@@ -1,31 +1,38 @@
 [
   {
-    "objectID": "content/03_other/06_links.html",
-    "href": "content/03_other/06_links.html",
-    "title": "Links",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "My Lab Journal",
     "section": "",
-    "text": "R is a free open-source programming language that can be used for statistical analysis, data-simulation, graphing, and lots of other stuff. Another free program is R-studio, that provides a nice graphic interface for R. Download R first, then download R-studio. Both can run on PCs, Macs or Linux. Students will be learning R in the stats labs using the lab manual .\n\n\n\n\nGoogle is great, Google your problem\nStackoverflow is great, google will often take you there because someone has already asked your question, and someone else has answered, usually many people have answered your question many ways."
+    "text": "##############################################################################\nPlease note that the images are not displaying correctly on the GitHub hosted webpage, despite showing on the webpage when hosted locally.\nIf the images and plots are not visible, screenshots of them can be found in the folder\ncontent\\01_journal\\Plots\n##############################################################################\n\nIntro To the tidyverse Challenges\nLink to Intro to Tidyverse Journal\n\n\nData Acquisition Challenges\nLink to Data Acquisition Journal\n\n\nData Wrangling Challenges\nLink to Data Wrangling Journal\n\n\nData Visualisation Challenges\nLink to Data Visualisation"
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "My Lab Journal",
+    "section": "How to use",
+    "text": "How to use\n\nAccept the assignment and get your own github repo.\nBlog/journal what you are doing in R, by editing the .qmd files.\nSee the links page for lots of helpful links on learning R.\nChange everything to make it your own.\nMake sure to render you website everytime before you want to upload changes"
+  },
+  {
+    "objectID": "content/02_notes/05_class_notes.html",
+    "href": "content/02_notes/05_class_notes.html",
+    "title": "Class Notes",
+    "section": "",
+    "text": "IMPORTANT: You can delete everything in here and start fresh. You might want to start by not deleting anything above this line until you know what that stuff is doing.\nThis is an .qmd file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header."
   },
   {
     "objectID": "content/01_journal/03_data_wrangling.html",
     "href": "content/01_journal/03_data_wrangling.html",
     "title": "Data Wrangling",
     "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
-  },
-  {
-    "objectID": "content/01_journal/04_data_visualization.html",
-    "href": "content/01_journal/04_data_visualization.html",
-    "title": "Data Visualization",
-    "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
+    "text": "library(vroom)\nlibrary(tidyverse)\nlibrary(data.table)\n\n\n1 Challenge Part 1:\n\n#importing data\npatent_assignee_col_types &lt;- list(\n  patent_id = col_character(),\n  assignee_id = col_character()\n)\n\npatent_assignee_tbl &lt;- vroom(\n  file       = \"DataWrangling/Patent_data_reduced/patent_assignee.tsv\", \n  delim      = \"\\t\", \n  col_types  = patent_assignee_col_types,\n  na         = c(\"\", \"NA\", \"NULL\")\n)\n\nassignee_col_types &lt;- list(\n  id = col_character(),\n  type = col_integer(),\n  organization = col_character()\n)\n\nassignee_tbl &lt;- vroom(\n  file       = \"DataWrangling/Patent_data_reduced/assignee.tsv\", \n  delim      = \"\\t\", \n  col_types  = assignee_col_types,\n  na         = c(\"\", \"NA\", \"NULL\")\n)\n\npatent_col_types &lt;- list(\n  id = col_character(),\n  date = col_date(\"%Y-%m-%d\"),\n  num_claims = col_double()\n)\n\npatent_tbl &lt;- vroom(\n  file       = \"DataWrangling/Patent_data_reduced/patent.tsv\", \n  delim      = \"\\t\", \n  col_types  = patent_col_types,\n  na         = c(\"\", \"NA\", \"NULL\")\n)\n\nuspc_col_types &lt;- list(\n  patent_id = col_character(),\n  mainclass_id = col_character(),\n  sequence = col_integer()\n)\n\nuspc_tbl &lt;- vroom(\n  file       = \"DataWrangling/Patent_data_reduced/uspc.tsv\", \n  delim      = \"\\t\", \n  col_types  = uspc_col_types,\n  na         = c(\"\", \"NA\", \"NULL\")\n)\n\n\nrm(assignee_col_types,patent_col_types,uspc_col_types,patent_assignee_col_types)\n\n\nsetDT(assignee_tbl)\n\nsetDT(patent_assignee_tbl)\n\nsetkey(assignee_tbl,id)\nsetkey(patent_assignee_tbl,assignee_id)\n\n\ncombined_data_tbl &lt;- assignee_tbl[patent_assignee_tbl]\n\ntemp &lt;-combined_data_tbl[,.N,by = organization]\n\nsetDT(temp)\n\nsetorder(temp,-N)\n\ntemp[1:5,,]\n\n\n\n  \n\n\n\n\n2 Challenge Part 2:\n\ncombined_data_tbl &lt;- combined_data_tbl[patent_tbl, on = c(patent_id=\"id\")]\n\ncombined_data_tbl &lt;- na.omit(combined_data_tbl) #remove rows where organisation is NULL\n\ntemp_tbl &lt;- combined_data_tbl[month(date)==5 & year(date)==2014 & !is.null(organization),.N, by = organization]\n\nsetorder(temp_tbl,-N)\n\ntemp_tbl[1:10,,]\n\n\n\n  \n\n\n\n\n3 Challenge Part 3:\n\nsetkey(uspc_tbl,NULL)\nsetkey(patent_tbl,NULL)\nsetkey(patent_assignee_tbl,NULL)\nsetDT(uspc_tbl)\ncombined_data_tbl &lt;-uspc_tbl[patent_assignee_tbl,on = \"patent_id\"]\ncombined_data_tbl &lt;- combined_data_tbl[assignee_tbl,on = c(assignee_id=\"id\")]\nsetDT(combined_data_tbl)\n\ncombined_data_tbl &lt;- na.omit(combined_data_tbl)\n\ntemp_tbl &lt;-combined_data_tbl[,.(patents= .N),by=.(organization, mainclass_id)]  \n\nsetDT(temp_tbl)\nsetorder(temp_tbl,-patents)\ntemp_tbl&lt;-temp_tbl[1:10,.('Occurence in top 10'=.N),by=mainclass_id] \ntemp_tbl[1:5,,]"
   },
   {
     "objectID": "content/01_journal/01_tidyverse.html",
     "href": "content/01_journal/01_tidyverse.html",
     "title": "Tidyverse",
     "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh.\nThis is a .qmd file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
+    "text": "#1: Analyse sales by location with bar plot\n\n\nbike_orderlines_wrangled_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  # Separate location into city and state\n  separate(col    = location,\n           into   = c(\"city\", \"state\"),\n           sep    = \", \")\n\nsales_by_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  \n  #select columns\n  select(total_price, state) %&gt;%\n  \n  \n  #group by year & summarise sales\n  \n  group_by(state)%&gt;%\n  summarise(sales = sum(total_price)) %&gt;%\n  \n  mutate(sales_text = scales::dollar(sales, big.mark = \".\", \n                                     decimal.mark = \",\", \n                                     prefix = \"\", \n                                     suffix = \" €\"))\nsales_by_state_tbl\n\n\n\n  \n\n\n\n\n# Step 2 - Visualize\n\nsales_by_state_tbl %&gt;%\n  \n  ggplot(aes(x=state,y=sales)) +\n  \n  geom_col(fill=\"#2DC6D6\")+\n  geom_label(aes(label = sales_text))+\n  geom_smooth(method=\"lm\",se=FALSE)+\n  \n  scale_y_continuous(labels = scales::dollar_format(big.mark = \".\", \n                                                    decimal.mark = \",\", \n                                                    prefix = \"\", \n                                                    suffix = \" €\")) +\n  labs(\n    title    = \"Revenue by State\",\n    x = \"\", # Override defaults for x and y\n    y = \"Revenue\"\n  )+\n  \n   theme(axis.text.x = element_text(angle = 45, hjust = 1))\n\n#&gt; `geom_smooth()` using formula = 'y ~ x'"
   },
   {
     "objectID": "content/01_journal/01_tidyverse.html#header-2",
@@ -39,27 +46,104 @@
     "href": "content/01_journal/02_data_acquisition.html",
     "title": "Data Acquisition",
     "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
+    "text": "library(httr)\nlibrary(tidyverse)\nlibrary(\"rstudioapi\")\nlibrary(keyring)\nlibrary(jsonlite)\nlibrary(ggplot2)\nlibrary(rvest)     \n\n#&gt; \n#&gt; Attaching package: 'rvest'\n\n\n#&gt; The following object is masked from 'package:readr':\n#&gt; \n#&gt;     guess_encoding\n\nlibrary(xopen)"
   },
   {
-    "objectID": "content/02_notes/05_class_notes.html",
-    "href": "content/02_notes/05_class_notes.html",
-    "title": "Class Notes",
+    "objectID": "content/01_journal/04_data_visualization.html",
+    "href": "content/01_journal/04_data_visualization.html",
+    "title": "Data Visualization",
     "section": "",
-    "text": "IMPORTANT: You can delete everything in here and start fresh. You might want to start by not deleting anything above this line until you know what that stuff is doing.\nThis is an .qmd file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header."
+    "text": "library(data.table)\nlibrary(tidyverse)\ncovid_data_tbl &lt;- read_csv(\"https://covid.ourworldindata.org/data/owid-covid-data.csv\")\n\n#&gt; Rows: 397677 Columns: 67\n#&gt; ── Column specification ────────────────────────────────────────────────────────\n#&gt; Delimiter: \",\"\n#&gt; chr   (4): iso_code, continent, location, tests_units\n#&gt; dbl  (62): total_cases, new_cases, new_cases_smoothed, total_deaths, new_dea...\n#&gt; date  (1): date\n#&gt; \n#&gt; ℹ Use `spec()` to retrieve the full column specification for this data.\n#&gt; ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "My Lab Journal",
+    "objectID": "content/03_other/06_links.html",
+    "href": "content/03_other/06_links.html",
+    "title": "Links",
     "section": "",
-    "text": "This is a template example for lab journaling. Students in the data science courses at the Institute of Entrepreneurship will use this template to learn R for business analytics. Students can replace this text as they wish."
+    "text": "R is a free open-source programming language that can be used for statistical analysis, data-simulation, graphing, and lots of other stuff. Another free program is R-studio, that provides a nice graphic interface for R. Download R first, then download R-studio. Both can run on PCs, Macs or Linux. Students will be learning R in the stats labs using the lab manual .\n\n\n\n\nGoogle is great, Google your problem\nStackoverflow is great, google will often take you there because someone has already asked your question, and someone else has answered, usually many people have answered your question many ways."
   },
   {
-    "objectID": "index.html#how-to-use",
-    "href": "index.html#how-to-use",
+    "objectID": "content/03_other/06_links.html#r-and-r-studio",
+    "href": "content/03_other/06_links.html#r-and-r-studio",
+    "title": "Links",
+    "section": "",
+    "text": "R is a free open-source programming language that can be used for statistical analysis, data-simulation, graphing, and lots of other stuff. Another free program is R-studio, that provides a nice graphic interface for R. Download R first, then download R-studio. Both can run on PCs, Macs or Linux. Students will be learning R in the stats labs using the lab manual ."
+  },
+  {
+    "objectID": "content/03_other/06_links.html#additional-r-resources",
+    "href": "content/03_other/06_links.html#additional-r-resources",
+    "title": "Links",
+    "section": "",
+    "text": "Google is great, Google your problem\nStackoverflow is great, google will often take you there because someone has already asked your question, and someone else has answered, usually many people have answered your question many ways."
+  },
+  {
+    "objectID": "index.html#analyse-sales-by-location-with-bar-plot",
+    "href": "index.html#analyse-sales-by-location-with-bar-plot",
     "title": "My Lab Journal",
-    "section": "How to use",
-    "text": "How to use\n\nAccept the assignment and get your own github repo.\nBlog/journal what you are doing in R, by editing the .qmd files.\nSee the links page for lots of helpful links on learning R.\nChange everything to make it your own.\nMake sure to render you website everytime before you want to upload changes"
+    "section": "1: Analyse sales by location with bar plot",
+    "text": "1: Analyse sales by location with bar plot\n\nManipulation\nbike_orderlines_wrangled_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;% # Separate location into city and state separate(col = location, into = c(“city”, “state”), sep = “,”)\nlibrary(lubridate)\nsales_by_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n#select columns select(total_price, state) %&gt;%\n#group by year & summarise sales\ngroup_by(state)%&gt;% summarise(sales = sum(total_price)) %&gt;%\nmutate(sales_text = scales::dollar(sales, big.mark = “.”, decimal.mark = “,”, prefix = ““, suffix =” €“)) sales_by_state_tbl\n\n\nVisualising\nsales_by_state_tbl %&gt;%\nggplot(aes(x=state,y=sales)) +\ngeom_col(fill=“#2DC6D6”)+ geom_label(aes(label = sales_text))+ geom_smooth(method=“lm”,se=FALSE)+\nscale_y_continuous(labels = scales::dollar_format(big.mark = “.”, decimal.mark = “,”, prefix = ““, suffix =” €“)) + labs( title =”Revenue by State”, x = ““, # Override defaults for x and y y =”Revenue” )+\ntheme(axis.text.x = element_text(angle = 45, hjust = 1))"
+  },
+  {
+    "objectID": "index.html#analyse-sales-by-location-and-yearfacet_wrap",
+    "href": "index.html#analyse-sales-by-location-and-yearfacet_wrap",
+    "title": "My Lab Journal",
+    "section": "2: analyse sales by location and year(facet_wrap)",
+    "text": "2: analyse sales by location and year(facet_wrap)\n### Manipulation\nsales_by_year_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\nselect(order_date, total_price, state) %&gt;% mutate(year = year(order_date)) %&gt;%\ngroup_by(year,state) %&gt;% summarise(sales = sum(total_price)) %&gt;% ungroup() %&gt;%\nmutate(sales_text = scales::dollar(sales,big.mark = “.”, decimal.mark = “,”, prefix = ““, suffix =” €“))\nsales_by_year_state_tbl\n### Visualisation\nsales_by_year_state_tbl %&gt;%\n# Set up x, y, fill ggplot(aes(x = year, y = sales, fill = state)) +\n# Geometries geom_col() + # Run up to here to get a stacked bar plot\ngeom_smooth(method = “lm”, se = FALSE) + # Adding a trendline\n# Facet facet_wrap(~ state) +\n# Formatting scale_y_continuous(labels = scales::dollar_format(big.mark = “.”, decimal.mark = “,”, prefix = ““, suffix =” €“)) + labs( title =”Revenue by year and State”, fill = “State” # Changes the legend name )"
+  },
+  {
+    "objectID": "index.html#challenge-1",
+    "href": "index.html#challenge-1",
+    "title": "My Lab Journal",
+    "section": "Challenge 1",
+    "text": "Challenge 1\n\n#1: Analyse sales by location with bar plot\n\n\nbike_orderlines_wrangled_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  # Separate location into city and state\n  separate(col    = location,\n           into   = c(\"city\", \"state\"),\n           sep    = \", \")\n\nsales_by_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  \n  #select columns\n  select(total_price, state) %&gt;%\n  \n  \n  #group by year & summarise sales\n  \n  group_by(state)%&gt;%\n  summarise(sales = sum(total_price)) %&gt;%\n  \n  mutate(sales_text = scales::dollar(sales, big.mark = \".\", \n                                     decimal.mark = \",\", \n                                     prefix = \"\", \n                                     suffix = \" €\"))\nsales_by_state_tbl\n\n# A tibble: 12 × 3\n   state                            sales sales_text  \n   &lt;chr&gt;                            &lt;dbl&gt; &lt;chr&gt;       \n 1 Baden-Württemberg              6521090 6.521.090 € \n 2 Bavaria                        6742819 6.742.819 € \n 3 Berlin                         1128433 1.128.433 € \n 4 Bremen                        10653499 10.653.499 €\n 5 Hamburg                        3874756 3.874.756 € \n 6 Hesse                          1558901 1.558.901 € \n 7 Lower Saxony                   4107115 4.107.115 € \n 8 Mecklenburg-Western Pomerania   618974 618.974 €   \n 9 North Rhine-Westphalia        21200613 21.200.613 €\n10 Saxony                         2230245 2.230.245 € \n11 Saxony-Anhalt                   569614 569.614 €   \n12 Schleswig-Holstein             3224749 3.224.749 € \n\n\n\n# Step 2 - Visualize\n\nsales_by_state_tbl %&gt;%\n  \n  ggplot(aes(x=state,y=sales)) +\n  \n  geom_col(fill=\"#2DC6D6\")+\n  geom_label(aes(label = sales_text))+\n  geom_smooth(method=\"lm\",se=FALSE)+\n  \n  scale_y_continuous(labels = scales::dollar_format(big.mark = \".\", \n                                                    decimal.mark = \",\", \n                                                    prefix = \"\", \n                                                    suffix = \" €\")) +\n  labs(\n    title    = \"Revenue by State\",\n    x = \"\", # Override defaults for x and y\n    y = \"Revenue\"\n  )+\n  \n   theme(axis.text.x = element_text(angle = 45, hjust = 1))\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\n\n\n#"
+  },
+  {
+    "objectID": "index.html#challenge-2",
+    "href": "index.html#challenge-2",
+    "title": "My Lab Journal",
+    "section": "Challenge 2",
+    "text": "Challenge 2\n\n  #Step 1: Manipulate\n\nsales_by_year_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  \n  select(order_date, total_price, state) %&gt;%\n  mutate(year = year(order_date)) %&gt;%\n  \n  group_by(year,state) %&gt;%\n  summarise(sales = sum(total_price)) %&gt;%\n  ungroup() %&gt;%\n  \n  mutate(sales_text = scales::dollar(sales,big.mark = \".\",\n                                     decimal.mark = \",\",\n                                     prefix = \"\",\n                                     suffix = \" €\"))\n\n`summarise()` has grouped output by 'year'. You can override using the\n`.groups` argument.\n\nsales_by_year_state_tbl\n\n# A tibble: 60 × 4\n    year state                           sales sales_text \n   &lt;dbl&gt; &lt;chr&gt;                           &lt;dbl&gt; &lt;chr&gt;      \n 1  2015 Baden-Württemberg             1031924 1.031.924 €\n 2  2015 Bavaria                       1301461 1.301.461 €\n 3  2015 Berlin                          95853 95.853 €   \n 4  2015 Bremen                        1395912 1.395.912 €\n 5  2015 Hamburg                        423090 423.090 €  \n 6  2015 Hesse                          308609 308.609 €  \n 7  2015 Lower Saxony                   584386 584.386 €  \n 8  2015 Mecklenburg-Western Pomerania  222003 222.003 €  \n 9  2015 North Rhine-Westphalia        3735092 3.735.092 €\n10  2015 Saxony                         238371 238.371 €  \n# ℹ 50 more rows\n\n\n\n# Step 2: Visualise\n\n\nsales_by_year_state_tbl %&gt;%\n  \n  # Set up x, y, fill\n  ggplot(aes(x = year, y = sales, fill = state)) +\n  \n  # Geometries\n  geom_col() + # Run up to here to get a stacked bar plot\n  \n  geom_smooth(method = \"lm\", se = FALSE) + # Adding a trendline\n  \n  # Facet\n  facet_wrap(~ state) +\n  \n  # Formatting\n  scale_y_continuous(labels = scales::dollar_format(big.mark = \".\", \n                                                    decimal.mark = \",\", \n                                                    prefix = \"\", \n                                                    suffix = \" €\")) +\n  labs(\n    title = \"Revenue by year and State\",\n    fill = \"State\" # Changes the legend name\n  )\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\n\n\n#"
+  },
+  {
+    "objectID": "content/01_journal/01_tidyverse.html#challenge-1",
+    "href": "content/01_journal/01_tidyverse.html#challenge-1",
+    "title": "Tidyverse",
+    "section": "",
+    "text": "#1: Analyse sales by location with bar plot\n\n\nbike_orderlines_wrangled_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  # Separate location into city and state\n  separate(col    = location,\n           into   = c(\"city\", \"state\"),\n           sep    = \", \")\n\nsales_by_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  \n  #select columns\n  select(total_price, state) %&gt;%\n  \n  \n  #group by year & summarise sales\n  \n  group_by(state)%&gt;%\n  summarise(sales = sum(total_price)) %&gt;%\n  \n  mutate(sales_text = scales::dollar(sales, big.mark = \".\", \n                                     decimal.mark = \",\", \n                                     prefix = \"\", \n                                     suffix = \" €\"))\nsales_by_state_tbl\n\n\n\n  \n\n\n\n\n# Step 2 - Visualize\n\nsales_by_state_tbl %&gt;%\n  \n  ggplot(aes(x=state,y=sales)) +\n  \n  geom_col(fill=\"#2DC6D6\")+\n  geom_label(aes(label = sales_text))+\n  geom_smooth(method=\"lm\",se=FALSE)+\n  \n  scale_y_continuous(labels = scales::dollar_format(big.mark = \".\", \n                                                    decimal.mark = \",\", \n                                                    prefix = \"\", \n                                                    suffix = \" €\")) +\n  labs(\n    title    = \"Revenue by State\",\n    x = \"\", # Override defaults for x and y\n    y = \"Revenue\"\n  )+\n  \n   theme(axis.text.x = element_text(angle = 45, hjust = 1))\n\n#&gt; `geom_smooth()` using formula = 'y ~ x'"
+  },
+  {
+    "objectID": "content/01_journal/01_tidyverse.html#challenge-2",
+    "href": "content/01_journal/01_tidyverse.html#challenge-2",
+    "title": "Tidyverse",
+    "section": "\n2 Challenge 2",
+    "text": "2 Challenge 2\n\n  #Step 1: Manipulate\n\nsales_by_year_state_tbl &lt;- bike_orderlines_wrangled_tbl %&gt;%\n  \n  select(order_date, total_price, state) %&gt;%\n  mutate(year = year(order_date)) %&gt;%\n  \n  group_by(year,state) %&gt;%\n  summarise(sales = sum(total_price)) %&gt;%\n  ungroup() %&gt;%\n  \n  mutate(sales_text = scales::dollar(sales,big.mark = \".\",\n                                     decimal.mark = \",\",\n                                     prefix = \"\",\n                                     suffix = \" €\"))\n\n#&gt; `summarise()` has grouped output by 'year'. You can override using the\n#&gt; `.groups` argument.\n\nsales_by_year_state_tbl\n\n\n\n  \n\n\n\n\n# Step 2: Visualise\n\n\nsales_by_year_state_tbl %&gt;%\n  \n  # Set up x, y, fill\n  ggplot(aes(x = year, y = sales, fill = state)) +\n  \n  # Geometries\n  geom_col() + # Run up to here to get a stacked bar plot\n  \n  geom_smooth(method = \"lm\", se = FALSE) + # Adding a trendline\n  \n  # Facet\n  facet_wrap(~ state) +\n  \n  # Formatting\n  scale_y_continuous(labels = scales::dollar_format(big.mark = \".\", \n                                                    decimal.mark = \",\", \n                                                    prefix = \"\", \n                                                    suffix = \" €\")) +\n  labs(\n    title = \"Revenue by year and State\",\n    fill = \"State\" # Changes the legend name\n  )\n\n#&gt; `geom_smooth()` using formula = 'y ~ x'\n\n\n\n\n\n\n\n\nplot can be found at: \\content\\01_journal\\Plots\\revenue_year_state_sales.png"
+  },
+  {
+    "objectID": "content/01_journal/04_data_visualization.html#data-import",
+    "href": "content/01_journal/04_data_visualization.html#data-import",
+    "title": "Data Visualization",
+    "section": "",
+    "text": "library(data.table)\nlibrary(tidyverse)\ncovid_data_tbl &lt;- read_csv(\"https://covid.ourworldindata.org/data/owid-covid-data.csv\")\n\n#&gt; Rows: 397677 Columns: 67\n#&gt; ── Column specification ────────────────────────────────────────────────────────\n#&gt; Delimiter: \",\"\n#&gt; chr   (4): iso_code, continent, location, tests_units\n#&gt; dbl  (62): total_cases, new_cases, new_cases_smoothed, total_deaths, new_dea...\n#&gt; date  (1): date\n#&gt; \n#&gt; ℹ Use `spec()` to retrieve the full column specification for this data.\n#&gt; ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
+  },
+  {
+    "objectID": "content/01_journal/04_data_visualization.html#challenge-1",
+    "href": "content/01_journal/04_data_visualization.html#challenge-1",
+    "title": "Data Visualization",
+    "section": "\n2 Challenge 1",
+    "text": "2 Challenge 1\n\n# Challenge 1: Plot covid cases per month per country\n\n## plot should be line graph, each country different colour scale =25 Million\n## plot should contain date, cumulative cases, country\ncovid_data_reduced_tbl &lt;- covid_data_tbl %&gt;%\n                          select(location,total_cases,date,continent)%&gt;%\n                          #filter(starts_with(location, \"Ger\") )\n                          filter(date&lt;\"2022-05-31\" )%&gt;%\n                          #filter(continent=='Europe')%&gt;%\n                          #complete(total_cases_per_million) %&gt;% \n                          mutate(across(total_cases, ~replace_na(., 0)))%&gt;%\n                          filter(location ==\"Germany\"|location ==\"United Kingdom\"|location ==\"France\"|location ==\"Spain\"|location ==\"United States\")\n                            \n\ncovid_data_reduced_tbl %&gt;%\n  \n  #distinct(date,total_cases_per_million,location)\n  ggplot(aes(date,total_cases,group = location, color = location)) +\n    geom_line()+\n    geom_smooth(span = 0.05)+\n  scale_x_date(\n      NULL,\n      breaks = scales::breaks_width(\"1 months\"),\n      date_labels = \"%b '%y\"\n      #scale_x_date(date_labels = \"%b %y\")\n  )+\n  \n  scale_y_continuous(\n    labels = scales::label_number(scale = 1e-6, \n                                  preix = \"\",\n                                  suffix = \"M\")\n  )+\n  \n  labs(\n    title = \"COVID-19 Confirmed Worldwide Cases\",\n    subtitle = \"As of 01-07-2022\",\n    x=\"Month\",\n    y = \"Cumulative Cases\",\n    color = \"Country\"\n    \n  )+\n  theme(legend.position = 'bottom',\n        legend.direction = \"horizontal\",\n        legend.text.position = \"bottom\",\n        legend.background = element_rect(fill = 'transparent'),\n        legend.box.background = element_rect(fill='transparent'),\n        plot.background = element_rect(fill=\"transparent\",color=NA),\n        strip.background = element_rect(fill = 'transparent'),\n        axis.text.x = element_text(angle = 45, hjust = 1)\n        )\n\n#&gt; `geom_smooth()` using method = 'loess' and formula = 'y ~ x'\n\n\n\n\n\n\n\n\nplot can be found at: \\content\\01_journal\\Plots\\covid_cases_worldwide.png"
+  },
+  {
+    "objectID": "content/01_journal/04_data_visualization.html#challenge-2",
+    "href": "content/01_journal/04_data_visualization.html#challenge-2",
+    "title": "Data Visualization",
+    "section": "\n3 Challenge 2",
+    "text": "3 Challenge 2\n\nworld &lt;- map_data(\"world\")\n\nworld_tbl &lt;- world%&gt;%\n              select(long,lat,group,order,region)\n\nrm(\"world\")\n\ncovid_data_world &lt;-covid_data_tbl %&gt;%\n                    select(location,total_deaths_per_million,date,continent)%&gt;%\n                    mutate(across(total_deaths_per_million, ~replace_na(., 0)))%&gt;% \n                    mutate(mortality = total_deaths_per_million/1)%&gt;%\n                    filter(date ==\"2024-04-28\") %&gt;%\n                    mutate(location = case_when(\n                    location == \"United Kingdom\" ~ \"UK\",\n                    location == \"United States\" ~ \"USA\",\n                    location == \"Democratic Republic of Congo\" ~ \"Democratic Republic of the Congo\",\n                    TRUE ~ location\n                  )) %&gt;%\n                  distinct()\n                   \n\n\nsetDT(covid_data_world)\nsetDT(world_tbl)\n\ncovid_data_world &lt;- covid_data_world[world_tbl,on = c(location=\"region\")]\n\n\nggplot(covid_data_world, aes(long, lat, group = group))+\n  geom_polygon(aes(fill =mortality ), color = \"lightgrey\")+\n  scale_fill_gradient(low=\"red\",\n                      high =\"black\",\n                      name = \"Mortality rate\\n(Deaths per million)\")+\n  \n  labs(\n    title = \"COVID-19 Confirmed Worldwide Deaths relative to population size\",\n    subtitle = \"As of 28-04-2024\",\n    x=\"\",\n    y = \"\",\n  )+\n  theme(axis.text.x = element_blank(),\n        axis.text.y = element_blank(),\n        )\n\n\n\n\n\n\n\nplot can be found at: \\content\\01_journal\\Plots\\map_covid_mortality.png"
+  },
+  {
+    "objectID": "content/01_journal/02_data_acquisition.html#challenge-part-2",
+    "href": "content/01_journal/02_data_acquisition.html#challenge-part-2",
+    "title": "Data Acquisition",
+    "section": "\n1.1 Challenge Part 2",
+    "text": "1.1 Challenge Part 2\n\nurl_home        &lt;- \"https://www.rosebikes.de/fahrr%C3%A4der\"\n\nhtml_home       &lt;- read_html(url_home)\nhtml_home |&gt; xml2::write_html(\"radon_bikes.html\")\n\n\nbike_categories_chr &lt;- html_home |&gt;\n  \n  html_elements(css = \".catalog-navigation__link\") |&gt;\n  \n  html_attr('href') |&gt;\n  \n  str_c(\"https://www.rosebikes.de\", ... =_)\n\n\nbike_categories_chr\n\n#&gt; [1] \"https://www.rosebikes.de/fahrräder/gravel\"           \n#&gt; [2] \"https://www.rosebikes.de/fahrräder/rennrad\"          \n#&gt; [3] \"https://www.rosebikes.de/fahrräder/mtb\"              \n#&gt; [4] \"https://www.rosebikes.de/fahrräder/urban-&-trekking\" \n#&gt; [5] \"https://www.rosebikes.de/fahrräder/e-bike\"           \n#&gt; [6] \"https://www.rosebikes.de/fahrräder/sale\"             \n#&gt; [7] \"https://www.rosebikes.de/bike-finder\"                \n#&gt; [8] \"https://www.rosebikes.de/bikes-mit-kurzer-lieferzeit\"\n\n# Select gravel bike category\nbike_category_url &lt;- bike_categories_chr[1]\n\n# Get the URLs for the bikes of the first category\nhtml_bike_category  &lt;- read_html(bike_category_url)\n\nbike_url_chr        &lt;- html_bike_category |&gt;\n  \n  html_elements(\".basic-headline__title\") |&gt;\n  \n  \n  html_attr(\"href\")\n\nbike_url_chr\n\n#&gt;  [1] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA"
   }
 ]
